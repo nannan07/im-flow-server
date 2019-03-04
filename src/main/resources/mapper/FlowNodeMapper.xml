@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowNodeMapper">
+	<resultMap id="BaseResultMap"
+		type="com.allmsi.flow.model.FlowNode">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="flowId" property="flowId" jdbcType="VARCHAR" />
+		<result column="nodeName" property="nodeName"
+			jdbcType="VARCHAR" />
+		<result column="nodeType" property="nodeType"
+			jdbcType="VARCHAR" />
+		<result column="cTime" property="cTime" jdbcType="TIMESTAMP" />
+		<result column="cUserId" property="cUserId" jdbcType="VARCHAR" />
+		<result column="uTime" property="uTime" jdbcType="TIMESTAMP" />
+		<result column="uUserId" property="uUserId" jdbcType="VARCHAR" />
+		<result column="del" property="del" jdbcType="BIT" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, flowId, nodeName, nodeType, cTime, cUserId
+	</sql>
+	<select id="selectTheNextOneToStart" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select fn.id,fn.nodeName,fn.nodeType,fn.flowId from
+		im_tp_flow_node fn
+		INNER JOIN
+		(select r.sufNode from im_tp_flow_route r
+		INNER JOIN
+		(select a1.id from im_tp_flow_node a1
+		INNER JOIN im_tp_flow a2 on a1.flowId = a2.id
+		WHERE a1.nodeType = '01' and a2.flowCode=#{flowCode,jdbcType=VARCHAR}) b
+		on r.preNode = b.id ) a
+		on fn.id = a.sufNode
+	</select>
+	<select id="selectFlowNodeByFlowId" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_node
+		where flowId = #{flowId,jdbcType=VARCHAR} and
+		del=0
+		order by cTime desc
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_node
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<insert id="insertSelective"
+		parameterType="com.allmsi.flow.model.FlowNode">
+		insert into im_tp_flow_node
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="flowId != null">
+				flowId,
+			</if>
+			<if test="nodeName != null">
+				nodeName,
+			</if>
+			<if test="nodeType != null">
+				nodeType,
+			</if>
+			<if test="cUserId != null">
+				cUserId,
+			</if>
+			cTime,del
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="flowId != null">
+				#{flowId,jdbcType=VARCHAR},
+			</if>
+			<if test="nodeName != null">
+				#{nodeName,jdbcType=VARCHAR},
+			</if>
+			<if test="nodeType != null">
+				#{nodeType,jdbcType=VARCHAR},
+			</if>
+			<if test="cUserId != null">
+				#{cUserId,jdbcType=VARCHAR},
+			</if>
+			now(),0
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.allmsi.flow.model.FlowNode">
+		update im_tp_flow_node
+		<set>
+			<if test="flowId != null">
+				flowId = #{flowId,jdbcType=VARCHAR},
+			</if>
+			<if test="nodeName != null">
+				nodeName = #{nodeName,jdbcType=VARCHAR},
+			</if>
+			<if test="nodeType != null">
+				nodeType = #{nodeType,jdbcType=VARCHAR},
+			</if>
+			<if test="uUserId != null">
+				uUserId = #{uUserId,jdbcType=VARCHAR},
+			</if>
+			uTime = now()
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByPrimaryKey"
+		parameterType="com.allmsi.flow.model.FlowNode">
+		update im_tp_flow_node set uTime = now(),del=1
+		<if test="uUserId != null">
+			,uUserId = #{uUserId,jdbcType=VARCHAR}
+		</if>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByFlowId" parameterType="java.lang.String">
+		update im_tp_flow_node
+		set uTime = now(),del=1
+		where flowId = #{flowId,jdbcType=VARCHAR} and
+		del=0
+	</update>
+</mapper>

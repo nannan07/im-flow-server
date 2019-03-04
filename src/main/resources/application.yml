@@ -1,0 +1,56 @@
+server:
+  port: 8605 #配置程序端口，默认为8080
+  context-path: # 配置默认访问路径
+  
+eureka: 
+  client: 
+    serviceUrl: 
+      defaultZone:  http://47.105.38.33:8082/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+    ip-address: 10.154.110.229
+
+im:
+  session:
+    out: 3600 #session out time
+  user:
+    default:
+      psw: 1234 #用户的默认密码
+  menu:
+    root:
+      id: 0 #菜单跟路径
+  cache: map      #Cache configuration item,可选缓存map,redis,默认map,严格匹配
+  redis:
+    cache: com.allmsi.cache.redis.RedisCache  #redis实现类
+
+spring:
+  datasource:
+    url: jdbc:mysql://47.105.38.33:3306/im_flow_server_dev?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false
+    username: im01
+    password: im123456
+    driver-class-name: com.mysql.jdbc.Driver
+  application: 
+    name: flow-server-1
+  
+redis:
+  database: 1
+  host: 47.105.38.33
+  port: 6379
+  password: im123456
+  timeout: 5000
+  pool:
+    max-active: 8
+    max-wait: -1
+    max-idle: 8
+    min-idle: 0
+
+mybatis:
+  mapperLocations: classpath:mapper/*.xml
+  typeAliasesPackage: com.allmsi.flow.model
+  
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql

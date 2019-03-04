@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowInstanceOpinionMapper">
+	<resultMap id="BaseResultMap"
+		type="com.allmsi.flow.model.FlowInstanceOpinion">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="instanceLogId" property="instanceLogId"
+			jdbcType="VARCHAR" />
+		<result column="opinion" property="opinion" jdbcType="VARCHAR" />
+		<result column="cTime" property="cTime" jdbcType="TIMESTAMP" />
+		<result column="cUserId" property="cUserId" jdbcType="VARCHAR" />
+		<result column="uTime" property="uTime" jdbcType="TIMESTAMP" />
+		<result column="del" property="del" jdbcType="BIT" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, instanceLogId, opinion, cTime, cUserId, uTime, del
+	</sql>
+	<select id="selectCountFlowInstanceOpinion" resultType="java.lang.Integer"
+		parameterType="java.lang.String">
+		SELECT count(fio.id) FROM im_tp_flow_instance_opinion fio
+		LEFT JOIN (
+		select fil.id,fil.instanceId from im_tp_flow_instance_log fil left join
+		im_tp_flow_instance fi ON fil.instanceId = fi.id
+		) a
+		ON fio.instanceLogId = a.id
+		WHERE a.instanceId = #{_parameter,jdbcType=VARCHAR} and fio.del=0
+	</select>
+	<select id="selectFlowInstanceOpinionList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		SELECT fio.id, fio.instanceLogId, fio.opinion, fio.cTime, fio.cUserId FROM im_tp_flow_instance_opinion fio
+		LEFT JOIN (
+		select fil.id,fil.instanceId from im_tp_flow_instance_log fil left join
+		im_tp_flow_instance fi ON fil.instanceId = fi.id
+		) a
+		ON fio.instanceLogId = a.id
+		WHERE a.instanceId = #{instanceId,jdbcType=VARCHAR} and fio.del=0
+		order by fio.cTime
+		<if test="page != null and pageSize != null ">
+			LIMIT #{page},#{pageSize}
+		</if>
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_instance_opinion
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<insert id="insertSelective" parameterType="com.allmsi.flow.model.FlowInstanceOpinion">
+		insert into im_tp_flow_instance_opinion
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="instanceLogId != null">
+				instanceLogId,
+			</if>
+			<if test="opinion != null">
+				opinion,
+			</if>
+			<if test="cTime != null">
+				cTime,
+			</if>
+			<if test="cUserId != null">
+				cUserId,
+			</if>
+			cTime, del
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="instanceLogId != null">
+				#{instanceLogId,jdbcType=VARCHAR},
+			</if>
+			<if test="opinion != null">
+				#{opinion,jdbcType=VARCHAR},
+			</if>
+			<if test="cUserId != null">
+				#{cUserId,jdbcType=VARCHAR},
+			</if>
+			now(),0
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.allmsi.flow.model.FlowInstanceOpinion">
+		update im_tp_flow_instance_opinion
+		<set>
+			<if test="instanceLogId != null">
+				instanceLogId = #{instanceLogId,jdbcType=VARCHAR},
+			</if>
+			<if test="opinion != null">
+				opinion = #{opinion,jdbcType=VARCHAR},
+			</if>
+			<if test="cTime != null">
+				cTime = #{cTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="cUserId != null">
+				cUserId = #{cUserId,jdbcType=VARCHAR},
+			</if>
+			uTime = now()
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByPrimaryKey" parameterType="java.lang.String">
+		update im_tp_flow_instance_opinion set uTime = now(), del=1
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

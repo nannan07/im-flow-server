@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowTodoMapper">
+	<resultMap id="BaseResultMap"
+		type="com.allmsi.flow.model.FlowTodo">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="stateId" property="stateId" jdbcType="VARCHAR" />
+		<result column="objId" property="objId" jdbcType="VARCHAR" />
+		<result column="objName" property="objName" jdbcType="VARCHAR" />
+		<result column="objValue1" property="objValue1"
+			jdbcType="VARCHAR" />
+		<result column="objValue2" property="objValue2"
+			jdbcType="VARCHAR" />
+		<result column="objValue3" property="objValue3"
+			jdbcType="VARCHAR" />
+		<result column="objValue4" property="objValue4"
+			jdbcType="VARCHAR" />
+		<result column="objValue5" property="objValue5"
+			jdbcType="VARCHAR" />
+
+		<result column="preDealId" property="preDealId"
+			jdbcType="VARCHAR" />
+		<result column="sufDealId" property="sufDealId"
+			jdbcType="VARCHAR" />
+		<result column="sufAuthType" property="sufAuthType"
+			jdbcType="VARCHAR" />
+		<result column="uTime" property="uTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		td.id, td.stateId, td.objId, td.objName, td.objValue1,
+		td.objValue2,
+		td.objValue3, td.objValue4,
+		td.objValue5,t1.preDealId,t1.sufDealId,t1.sufAuthType,t1.uTime
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_todo
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectTodoList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from
+		im_tp_flow_todo td
+		inner join ( select
+		fi.objectId,fis.preDealId,fis.sufDealId,fis.sufAuthType,fis.uTime from
+		im_tp_flow_instance fi
+		left
+		join im_tp_flow_instance_state fis on fi.id
+		= fis.instanceId
+		left join
+		im_tp_flow f on f.id = fi.flowId
+		where
+		fis.sufDealId = #{userId} and
+		fis.sufDealType = "01" and fis.del = 0
+		and f.flowCode = #{flowCode} and
+		f.del = 0 )t1 on t1.objectId =
+		td.objId
+	</select>
+	<select id="selectDoneList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_todo td inner join (select
+		fi.objectId,fil.preDealId,fil.sufDealId,fil.sufAuthType,fil.uTime from
+		im_tp_flow
+		f
+		left join im_tp_flow_instance fi on f.id
+		= fi.flowId left
+		join
+		im_tp_flow_instance_log
+		fil on fi.id = fil.instanceId where
+		f.flowCode
+		= #{flowCode} and f.del = 0 and
+		fil.preDealId = #{userId} )t1
+		on
+		td.objId = t1.objectId
+	</select>
+	<insert id="insertBatch" parameterType="java.util.List">
+		insert into im_tp_flow_todo
+		(id,stateId,objId,objName,objValue1,objValue2,objValue3,objValue4,objValue5)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.stateId},#{item.objId},#{item.objName},#{item.objValue1},
+			#{item.objValue2},#{item.objValue3},#{item.objValue4},#{item.objValue5})
+		</foreach>
+	</insert>
+</mapper>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowInstanceStateMapper">
+	<resultMap id="BaseResultMap"
+		type="com.allmsi.flow.model.FlowInstanceState">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="instanceId" property="instanceId"
+			jdbcType="VARCHAR" />
+		<result column="nodeId" property="nodeId" jdbcType="VARCHAR" />
+		<result column="routeId" property="routeId" jdbcType="VARCHAR" />
+		<result column="preDealId" property="preDealId"
+			jdbcType="VARCHAR" />
+		<result column="sufDealId" property="sufDealId"
+			jdbcType="VARCHAR" />
+		<result column="sufDealType" property="sufDealType"
+			jdbcType="VARCHAR" />
+		<result column="sufAuthType" property="sufAuthType"
+			jdbcType="VARCHAR" />
+		<result column="uTime" property="uTime" jdbcType="TIMESTAMP" />
+		<result column="uUserId" property="uUserId" jdbcType="VARCHAR" />
+		<result column="del" property="del" jdbcType="INTEGER" />
+
+		<result column="nodeName" property="nodeName"
+			jdbcType="VARCHAR" />
+		<result column="nodeType" property="nodeType"
+			jdbcType="VARCHAR" />
+
+		<result column="routeName" property="routeName"
+			jdbcType="VARCHAR" />
+
+		<result column="objectId" property="objectId"
+			jdbcType="VARCHAR" />
+		<result column="flowId" property="flowId" jdbcType="VARCHAR" />
+		<result column="flowCode" property="flowCode"
+			jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		fis.id, fis.instanceId, fis.nodeId, fis.routeId,
+		fis.preDealId,
+		fis.sufDealId, fis.sufDealType, fis.sufAuthType,
+		fis.uTime, fis.uUserId
+	</sql>
+	<select id="selectFlowInstanceStateByObj"
+		resultMap="BaseResultMap" parameterType="java.lang.String">
+		select fi.objectId,
+		<include refid="Base_Column_List" />
+		,fn.nodeName,fn.nodeType,fr.routeName from im_tp_flow_instance_state fis
+		INNER JOIN im_tp_flow_instance fi on fis.instanceId = fi.id
+		left join im_tp_flow_node fn on fis.nodeId = fn.id
+		left join im_tp_flow_route fr on fis.routeId = fr.id
+		where fi.objectId= #{objectId,jdbcType=VARCHAR} and fis.del=0
+	</select>
+	<select id="selectByInstanceId" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		,fn.nodeName,fn.nodeType,fr.routeName from im_tp_flow_instance_state
+		fis
+		left join im_tp_flow_node fn on fis.nodeId = fn.id
+		left join
+		im_tp_flow_route fr on fis.routeId = fr.id
+		where del=0 and instanceId =
+		#{instanceId,jdbcType=VARCHAR}
+	</select>
+	<select id="flowInstenceStateInfo" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		fis.id, fis.instanceId, fis.nodeId,fis.preDealId, fis.sufDealId, fis.sufDealType, fis.sufAuthType,
+		fis.uTime, fis.uUserId ,fn.nodeName,fn.nodeType,fr.routeName,fis.routeId,fi.flowCode,fi.objectId,fi.flowId
+		from im_tp_flow_instance_state fis
+		inner join im_tp_flow_node fn on fis.nodeId = fn.id
+		inner join im_tp_flow_route fr on fis.routeId = fr.id
+		inner join (select a.id,a.flowId,a.objectId,b.flowCode from im_tp_flow_instance a inner join im_tp_flow b on a.flowId = b.id and b.del=0 where a.objectId = #{objId,jdbcType=VARCHAR}) fi
+		on fis.instanceId = fi.id
+		where fis.sufDealId = #{sufDealId,jdbcType=VARCHAR} and fis.sufDealType=#{sufDealType,jdbcType=VARCHAR}
+	</select>
+	<insert id="insertSelective"
+		parameterType="com.allmsi.flow.model.FlowInstanceState">
+		insert into im_tp_flow_instance_state
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="instanceId != null">
+				instanceId,
+			</if>
+			<if test="nodeId != null">
+				nodeId,
+			</if>
+			<if test="routeId != null">
+				routeId,
+			</if>
+			<if test="preDealId != null">
+				preDealId,
+			</if>
+			<if test="sufDealId != null">
+				sufDealId,
+			</if>
+			<if test="sufDealType != null">
+				sufDealType,
+			</if>
+			<if test="sufAuthType != null">
+				sufAuthType,
+			</if>
+			<if test="uUserId != null">
+				uUserId,
+			</if>
+			uTime
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="instanceId != null">
+				#{instanceId,jdbcType=VARCHAR},
+			</if>
+			<if test="nodeId != null">
+				#{nodeId,jdbcType=VARCHAR},
+			</if>
+			<if test="routeId != null">
+				#{routeId,jdbcType=VARCHAR},
+			</if>
+			<if test="preDealId != null">
+				#{preDealId,jdbcType=VARCHAR},
+			</if>
+			<if test="sufDealId != null">
+				#{sufDealId,jdbcType=VARCHAR},
+			</if>
+			<if test="sufDealType != null">
+				#{sufDealType,jdbcType=VARCHAR},
+			</if>
+			<if test="sufAuthType != null">
+				#{sufAuthType,jdbcType=VARCHAR},
+			</if>
+			<if test="uUserId != null">
+				#{uUserId,jdbcType=VARCHAR},
+			</if>
+			now()
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.allmsi.flow.model.FlowInstanceState">
+		update im_tp_flow_instance_state
+		<set>
+			<if test="instanceId != null">
+				instanceId = #{instanceId,jdbcType=VARCHAR},
+			</if>
+			<if test="nodeId != null">
+				nodeId = #{nodeId,jdbcType=VARCHAR},
+			</if>
+			<if test="routeId != null">
+				routeId = #{routeId,jdbcType=VARCHAR},
+			</if>
+			<if test="preDealId != null">
+				preDealId = #{preDealId,jdbcType=VARCHAR},
+			</if>
+			<if test="sufDealId != null">
+				sufDealId = #{sufDealId,jdbcType=VARCHAR},
+			</if>
+			<if test="sufDealType != null">
+				sufDealType = #{sufDealType,jdbcType=VARCHAR},
+			</if>
+			<if test="sufAuthType != null">
+				sufAuthType = #{sufAuthType,jdbcType=VARCHAR},
+			</if>
+			<if test="uUserId != null">
+				uUserId = #{uUserId,jdbcType=VARCHAR},
+			</if>
+			uTime = now()
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<insert id="insertBantch">
+		insert into im_tp_flow_instance_state(id, instanceId, nodeId,
+		routeId,preDealId,sufDealId,sufDealType,
+		sufAuthType,uUserId,uTime,del)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.instanceId},#{item.nodeId},#{item.routeId},#{item.preDealId},
+			#{item.sufDealId},#{item.sufDealType},#{item.sufAuthType},#{item.uUserId},now(),0)
+		</foreach>
+	</insert>
+	<update id="deleteBantch" parameterType="java.lang.String">
+		update
+		im_tp_flow_instance_state set del=1 where instanceId =
+		#{instanceId,jdbcType=VARCHAR}
+	</update>
+</mapper>

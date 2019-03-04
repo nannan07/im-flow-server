@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowMapper">
+	<resultMap id="BaseResultMap" type="com.allmsi.flow.model.Flow">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="flowCode" property="flowCode" jdbcType="VARCHAR" />
+		<result column="flowName" property="flowName" jdbcType="VARCHAR" />
+		<result column="flowType" property="flowType" jdbcType="VARCHAR" />
+		<result column="pId" property="pId" jdbcType="VARCHAR" />
+		<result column="cTime" property="cTime" jdbcType="TIMESTAMP" />
+		<result column="cUserId" property="cUserId" jdbcType="VARCHAR" />
+		<result column="uTime" property="uTime" jdbcType="TIMESTAMP" />
+		<result column="uUserId" property="uUserId" jdbcType="VARCHAR" />
+		<result column="del" property="del" jdbcType="BIT" />
+
+		<result column="authType" property="authType" jdbcType="VARCHAR" />
+	</resultMap>
+	<select id="selectMyFlowListCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(f.id) from im_tp_flow f
+		INNER JOIN im_tp_flow_auth fa on f.id = fa.flowId
+		where f.del=0 and fa.del=0
+		and
+		<if test="flowName != null and flowName != ''">
+			f.flowName like CONCAT('%', #{flowName}, '%') and
+		</if>
+		<foreach collection="flowDealType" item="item" index="index" open="(" close=")"
+			separator="or">
+			fa.authDealId = #{item.authDealId} and
+			fa.authDealType = #{item.authDealType}
+		</foreach>
+	</select>
+	<select id="selectMyFlowList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select f.id, f.flowCode, f.flowName, f.flowType,fa.authType
+		from im_tp_flow f
+		INNER JOIN im_tp_flow_auth fa on f.id = fa.flowId
+		where f.del=0 and fa.del=0
+		and
+		<if test="flowName != null and flowName != ''">
+			f.flowName like CONCAT('%', #{flowName}, '%') and
+		</if>
+		<foreach collection="flowDealType" item="item" index="index" open="(" close=")"
+			separator="or">
+			fa.authDealId = #{item.authDealId} and
+			fa.authDealType = #{item.authDealType}
+		</foreach>
+		<if test="page != null and pageSize != null ">
+			LIMIT #{page},#{pageSize}
+		</if>
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select id,flowCode,flowName,flowType,pId,cTime,cUserId
+		from im_tp_flow
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByPId" resultType="java.lang.String"
+		parameterType="java.lang.String">
+		select id from im_tp_flow
+		where pId =
+		#{_parameter,jdbcType=VARCHAR} and del = 0
+	</select>
+	<select id="selectConut" resultType="java.lang.Integer"
+		parameterType="java.lang.String">
+		select count(id) from im_tp_flow
+		where del=0 and flowType
+		= #{flowType,jdbcType=VARCHAR}
+	</select>
+	<select id="selectFlowInfoList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select id,flowCode,flowName,flowType,cTime,cUserId from im_tp_flow
+		where del=0
+		<choose>
+			<when test="flowType != null and flowType!=''">
+				and flowType = #{flowType,jdbcType=VARCHAR}
+			</when>
+			<otherwise>
+				and flowType='01'
+			</otherwise>
+		</choose>
+		order by cTime desc
+		<if test="page != null and pageSize != null ">
+			LIMIT #{page},#{pageSize}
+		</if>
+	</select>
+	<insert id="insertSelective" parameterType="com.allmsi.flow.model.Flow">
+		insert into im_tp_flow
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="flowCode != null">
+				flowCode,
+			</if>
+			<if test="flowName != null">
+				flowName,
+			</if>
+			<if test="flowType != null">
+				flowType,
+			</if>
+			<if test="pId != null">
+				pId,
+			</if>
+			<if test="cUserId != null">
+				cUserId,
+			</if>
+			cTime,del
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="flowCode != null">
+				#{flowCode,jdbcType=VARCHAR},
+			</if>
+			<if test="flowName != null">
+				#{flowName,jdbcType=VARCHAR},
+			</if>
+			<if test="flowType != null">
+				#{flowType,jdbcType=VARCHAR},
+			</if>
+			<if test="pId != null">
+				#{pId,jdbcType=VARCHAR},
+			</if>
+			<if test="cTime != null">
+				#{cTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="cUserId != null">
+				#{cUserId,jdbcType=VARCHAR},
+			</if>
+			now(), 0
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.allmsi.flow.model.Flow">
+		update im_tp_flow
+		<set>
+			<if test="flowCode != null">
+				flowCode = #{flowCode,jdbcType=VARCHAR},
+			</if>
+			<if test="flowName != null">
+				flowName = #{flowName,jdbcType=VARCHAR},
+			</if>
+			<if test="flowType != null">
+				flowType = #{flowType,jdbcType=VARCHAR},
+			</if>
+			<if test="pId != null">
+				pId = #{pId,jdbcType=VARCHAR},
+			</if>
+			<if test="uUserId != null">
+				uUserId = #{uUserId,jdbcType=VARCHAR},
+			</if>
+			uTime =now()
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByPrimaryKey" parameterType="com.allmsi.flow.model.Flow">
+		update im_tp_flow set uTime =now(),del=1
+		<if test="uUserId != null">
+			,uUserId = #{uUserId,jdbcType=VARCHAR}
+		</if>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByPId" parameterType="java.lang.String">
+		update im_tp_flow set
+		uTime =now(),del=1
+		where pId = #{pId,jdbcType=VARCHAR}
+	</update>
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowInstanceLogMapper">
+	<resultMap id="BaseResultMap" type="com.allmsi.flow.model.FlowInstanceLog">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="instanceId" property="instanceId" jdbcType="VARCHAR" />
+		<result column="nodeId" property="nodeId" jdbcType="VARCHAR" />
+		<result column="routeId" property="routeId" jdbcType="VARCHAR" />
+		<result column="preDealId" property="preDealId" jdbcType="VARCHAR" />
+		<result column="sufDealId" property="sufDealId" jdbcType="VARCHAR" />
+		<result column="sufDealType" property="sufDealType" jdbcType="VARCHAR" />
+		<result column="sufAuthType" property="sufAuthType" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="cTime" property="cTime" jdbcType="TIMESTAMP" />
+		<result column="cUserId" property="cUserId" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, instanceId, remark, cTime, cUserId
+	</sql>
+	<select id="selectCountInstanceLog" resultType="java.lang.Integer"
+		parameterType="java.lang.String">
+		select count(id)
+		from im_tp_flow_instance_log
+		where instanceId = #{instanceId,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByInstanceId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_instance_log
+		where instanceId = #{instanceId,jdbcType=VARCHAR}
+		<if test="page != null and pageSize != null ">
+			LIMIT #{page},#{pageSize}
+		</if>
+	</select>
+	<insert id="insertBantch">
+		insert into im_tp_flow_instance_log(id, instanceId, nodeId,
+		routeId,preDealId,sufDealId,sufDealType,
+		sufAuthType,remark,cUserId,cTime)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id},#{item.instanceId},#{item.nodeId},#{item.routeId},#{item.preDealId},
+			#{item.sufDealId},#{item.sufDealType},#{item.sufAuthType},#{item.remark},#{item.cUserId},now())
+		</foreach>
+	</insert>
+	<insert id="insertSelective" parameterType="com.allmsi.flow.model.FlowInstanceLog">
+		insert into im_tp_flow_instance_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="instanceId != null">
+				instanceId,
+			</if>
+			<if test="nodeId != null">
+				nodeId,
+			</if>
+			<if test="routeId != null">
+				routeId,
+			</if>
+			<if test="preDealId != null">
+				preDealId,
+			</if>
+			<if test="sufDealId != null">
+				sufDealId,
+			</if>
+			<if test="sufDealType != null">
+				sufDealType,
+			</if>
+			<if test="sufAuthType != null">
+				sufAuthType,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="cUserId != null">
+				cUserId,
+			</if>
+			cTime
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="instanceId != null">
+				#{instanceId,jdbcType=VARCHAR},
+			</if>
+			<if test="nodeId != null">
+				#{nodeId,jdbcType=VARCHAR},
+			</if>
+			<if test="routeId != null">
+				#{routeId,jdbcType=VARCHAR},
+			</if>
+			<if test="preDealId != null">
+				#{preDealId,jdbcType=VARCHAR},
+			</if>
+			<if test="sufDealId != null">
+				#{sufDealId,jdbcType=VARCHAR},
+			</if>
+			<if test="sufDealType != null">
+				#{sufDealType,jdbcType=VARCHAR},
+			</if>
+			<if test="sufAuthType != null">
+				#{sufAuthType,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="cUserId != null">
+				#{cUserId,jdbcType=VARCHAR},
+			</if>
+			now()
+		</trim>
+	</insert>
+</mapper>

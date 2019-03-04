@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowInstanceMapper">
+	<resultMap id="BaseResultMap"
+		type="com.allmsi.flow.model.FlowInstance">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="flowId" property="flowId" jdbcType="VARCHAR" />
+		<result column="objectId" property="objectId"
+			jdbcType="VARCHAR" />
+		<result column="cTime" property="cTime" jdbcType="TIMESTAMP" />
+		<result column="cUserId" property="cUserId" jdbcType="VARCHAR" />
+
+		<result column="flowCode" property="flowCode"
+			jdbcType="VARCHAR" />
+		<result column="flowName" property="flowName"
+			jdbcType="VARCHAR" />
+		<result column="flowType" property="flowType"
+			jdbcType="VARCHAR" />
+
+		<result column="nodeId" property="nodeId" jdbcType="VARCHAR" />
+		<result column="routeId" property="routeId" jdbcType="VARCHAR" />
+		<result column="nodeName" property="nodeName"
+			jdbcType="VARCHAR" />
+		<result column="routeName" property="routeName"
+			jdbcType="VARCHAR" />
+
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, flowId, objectId, cTime, cUserId
+	</sql>
+	<sql id="Base_Instance_List">
+		fi.id,fi.flowId,fi.objectId,fi.cTime,fi.cUserId,f.flowCode,f.flowType,f.flowName
+	</sql>
+	<sql id="Base_flowIns_flowIS_flow_Column_List">
+		fi.id,fi.flowId,fi.objectId,fi.cTime,fi.cUserId,a.nodeId,a.routeId,a.nodeName,a.routeName
+	</sql>
+	<select id="selectInstanceByObjId" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_instance
+		where objectId = #{objectId,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_instance
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<insert id="insertSelective"
+		parameterType="com.allmsi.flow.model.FlowInstance">
+		insert into im_tp_flow_instance
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="flowId != null">
+				flowId,
+			</if>
+			<if test="objectId != null">
+				objectId,
+			</if>
+			<if test="cUserId != null">
+				cUserId,
+			</if>
+			cTime
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="flowId != null">
+				#{flowId,jdbcType=VARCHAR},
+			</if>
+			<if test="objectId != null">
+				#{objectId,jdbcType=VARCHAR},
+			</if>
+			<if test="cUserId != null">
+				#{cUserId,jdbcType=VARCHAR},
+			</if>
+			now()
+		</trim>
+	</insert>
+	<select id="selectInstanceList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="Base_Instance_List" />
+		FROM im_tp_flow_instance fi
+		INNER JOIN im_tp_flow f ON fi.flowId = f.id
+		AND f.del = 0
+		WHERE fi.cUserId = #{userId,jdbcType=VARCHAR}
+		<if test="flowType != null and flowType != '' ">
+			AND f.flowType like CONCAT('%', #{flowType}, '%')
+		</if>
+		<if test="flowName != null and flowName != '' ">
+			AND f.flowName like CONCAT('%', #{flowName}, '%')
+		</if>
+		<if test="page != null and pageSize != null ">
+			LIMIT #{page},#{pageSize}
+		</if>
+		order by fi.cTime
+	</select>
+	<select id="countFlowInstanceList"
+		resultType="java.lang.Integer" parameterType="java.util.Map">
+		SELECT count(fi.id)
+		FROM im_tp_flow_instance fi
+		INNER JOIN im_tp_flow f
+		ON fi.flowId = f.id AND f.del = 0
+		WHERE fi.cUserId =
+		#{userId,jdbcType=VARCHAR}
+		<if test="flowType != null and flowType != '' ">
+			AND f.flowType like CONCAT('%', #{flowType}, '%')
+		</if>
+		<if test="flowName != null and flowName != '' ">
+			AND f.flowName like CONCAT('%', #{flowName}, '%')
+		</if>
+	</select>
+	<select id="selectInstanceMyList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		SELECT
+		<include refid="Base_Instance_List" />
+		FROM im_tp_flow_instance fi
+		INNER JOIN im_tp_flow f ON fi.flowId = f.id
+		AND f.del = 0
+		LEFT JOIN im_tp_flow_instance_state fis ON fi.id =
+		fis.instanceId
+		WHERE
+		<if test="flowType != null and flowType != '' ">
+			f.flowType like CONCAT('%', #{flowType}, '%') AND
+		</if>
+		<if test="flowName != null and flowName != '' ">
+			f.flowName like CONCAT('%', #{flowName}, '%') AND
+		</if>
+		<foreach collection="flowDealType" item="item" index="index"
+			open="(" close=")" separator="or">
+			fis.sufDealId = #{item.authDealId} and
+			fis.sufDealType = #{item.authDealType}
+		</foreach>
+		order by fi.cTime
+		<if test="page != null and pageSize != null ">
+			LIMIT #{page},#{pageSize}
+		</if>
+	</select>
+	<select id="countFlowInstanceMyList"
+		resultType="java.lang.Integer" parameterType="java.util.Map">
+		SELECT count(fi.id)
+		FROM im_tp_flow_instance fi
+		INNER JOIN im_tp_flow f
+		ON fi.flowId = f.id AND f.del = 0
+		LEFT JOIN im_tp_flow_instance_state
+		fis ON fi.id = fis.instanceId
+		WHERE
+		<if test="flowType != null and flowType != '' ">
+			f.flowType like CONCAT('%', #{flowType}, '%') AND
+		</if>
+		<if test="flowName != null and flowName != '' ">
+			f.flowName like CONCAT('%', #{flowName}, '%') AND
+		</if>
+		<foreach collection="flowDealType" item="item" index="index"
+			open="(" close=")" separator="or">
+			fis.sufDealId = #{item.authDealId} and
+			fis.sufDealType = #{item.authDealType}
+		</foreach>
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		im_tp_flow_instance
+		where id = #{id,jdbcType=VARCHAR}
+	</delete>
+	<delete id="deleteByFlowId" parameterType="java.lang.String">
+		delete from
+		im_tp_flow_instance
+		where flowId = #{flowId,jdbcType=VARCHAR}
+	</delete>
+</mapper>

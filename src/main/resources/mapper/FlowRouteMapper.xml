@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowRouteMapper">
+	<resultMap id="BaseResultMap"
+		type="com.allmsi.flow.model.FlowRoute">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="flowId" property="flowId" jdbcType="VARCHAR" />
+		<result column="routeName" property="routeName"
+			jdbcType="VARCHAR" />
+		<result column="preNode" property="preNode" jdbcType="VARCHAR" />
+		<result column="sufNode" property="sufNode" jdbcType="VARCHAR" />
+		<result column="isBack" property="isBack" jdbcType="BIT" />
+		<result column="cTime" property="cTime" jdbcType="TIMESTAMP" />
+		<result column="cUserId" property="cUserId" jdbcType="VARCHAR" />
+		<result column="uTime" property="uTime" jdbcType="TIMESTAMP" />
+		<result column="uUserId" property="uUserId" jdbcType="VARCHAR" />
+		<result column="del" property="del" jdbcType="BIT" />
+
+		<result column="flowCode" property="flowCode" jdbcType="VARCHAR" />
+		<result column="preNodeName" property="preNodeName"
+			jdbcType="VARCHAR" />
+		<result column="preNodeType" property="preNodeType"
+			jdbcType="VARCHAR" />
+		<result column="sufNodeName" property="sufNodeName"
+			jdbcType="VARCHAR" />
+		<result column="sufNodeType" property="sufNodeType"
+			jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, flowId, routeName,isBack, cTime, cUserId
+	</sql>
+	<sql id="Route_Node_List">
+		a.id, a.routeName, a.cTime, a.cUserId, a.flowId, a.isBack,
+		a.preNode, ap.nodeName AS preNodeName, ap.nodeType AS preNodeType,
+		a.sufNode, an.nodeName AS sufNodeName, an.nodeType AS sufNodeType
+	</sql>
+	<select id="selectRouteList" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Route_Node_List" />
+		from im_tp_flow_route a
+		LEFT JOIN im_tp_flow_node ap ON a.preNode =
+		ap.id and ap.del=0
+		LEFT JOIN im_tp_flow_node an ON a.sufNode = an.id
+		and an.del=0
+		where a.flowId = #{_parameter,jdbcType=VARCHAR} and
+		a.del=0
+		order by a.cTime desc
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Route_Node_List" />
+		from im_tp_flow_route a
+		LEFT JOIN im_tp_flow_node ap ON a.preNode =
+		ap.id and ap.del=0
+		LEFT JOIN im_tp_flow_node an ON a.sufNode = an.id
+		and an.del=0
+		where a.id = #{id,jdbcType=VARCHAR}
+	</select>
+	<insert id="insertSelective"
+		parameterType="com.allmsi.flow.model.FlowRoute">
+		insert into im_tp_flow_route
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="flowId != null">
+				flowId,
+			</if>
+			<if test="routeName != null">
+				routeName,
+			</if>
+			<if test="preNode != null">
+				preNode,
+			</if>
+			<if test="sufNode != null">
+				sufNode,
+			</if>
+			<if test="isBack != null">
+				isBack,
+			</if>
+			<if test="cUserId != null">
+				cUserId,
+			</if>
+			cTime,del
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="flowId != null">
+				#{flowId,jdbcType=VARCHAR},
+			</if>
+			<if test="routeName != null">
+				#{routeName,jdbcType=VARCHAR},
+			</if>
+			<if test="preNode != null">
+				#{preNode,jdbcType=VARCHAR},
+			</if>
+			<if test="sufNode != null">
+				#{sufNode,jdbcType=VARCHAR},
+			</if>
+			<if test="isBack != null">
+				#{isBack,jdbcType=BIT},
+			</if>
+			<if test="cUserId != null">
+				#{cUserId,jdbcType=VARCHAR},
+			</if>
+			now(),0
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.allmsi.flow.model.FlowRoute">
+		update im_tp_flow_route
+		<set>
+			<if test="flowId != null">
+				flowId = #{flowId,jdbcType=VARCHAR},
+			</if>
+			<if test="routeName != null">
+				routeName = #{routeName,jdbcType=VARCHAR},
+			</if>
+			<if test="preNode != null">
+				preNode = #{preNode,jdbcType=VARCHAR},
+			</if>
+			<if test="sufNode != null">
+				sufNode = #{sufNode,jdbcType=VARCHAR},
+			</if>
+			<if test="isBack != null">
+				isBack = #{isBack,jdbcType=BIT},
+			</if>
+			<if test="uUserId != null">
+				uUserId = #{uUserId,jdbcType=VARCHAR},
+			</if>
+			uTime = now()
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByPrimaryKey"
+		parameterType="com.allmsi.flow.model.FlowRoute">
+		update im_tp_flow_route set uTime = now(),del=1
+		<if test="uUserId != null">
+			,uUserId = #{uUserId,jdbcType=VARCHAR}
+		</if>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByNodeId" parameterType="java.lang.String">
+		update
+		im_tp_flow_route set uTime = now(),del=1
+		where preNode =
+		#{_parameter,jdbcType=VARCHAR} or sufNode =
+		#{_parameter,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByFlowId" parameterType="java.lang.String">
+		update
+		im_tp_flow_route set uTime = now(),del=1
+		where flowId =
+		#{flowId,jdbcType=VARCHAR}
+	</update>
+
+	<select id="selectRouteListByPreNode" resultMap="BaseResultMap"
+		parameterType="com.allmsi.flow.model.FlowRoute">
+		SELECT fr.id,fr.flowId,fr.routeName,fr.sufNode,fn.nodeType as sufNodeType,fn.nodeName as sufNodeName,fr.isBack FROM
+		im_tp_flow_route fr
+		left join im_tp_flow f on fr.flowId = f.id and f.del=0
+		left join im_tp_flow_node fn on fr.sufNode = fn.id and fn.del=0
+		WHERE fr.preNode = #{preNode,jdbcType=VARCHAR} AND f.flowCode =
+		#{flowCode,jdbcType=VARCHAR}
+		AND fr.del = 0
+	</select>
+	<select id="selectRouteListBySufNode" resultMap="BaseResultMap"
+		parameterType="com.allmsi.flow.model.FlowRoute">
+		SELECT id, flowId,routeName,preNode,sufNode,isBack FROM
+		im_tp_flow_route
+		WHERE sufNode = #{sufNode,jdbcType=VARCHAR} AND flowId
+		=
+		#{flowId,jdbcType=VARCHAR} AND del = 0
+	</select>
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.allmsi.flow.dao.FlowRouteDealMapper">
+	<resultMap id="BaseResultMap" type="com.allmsi.flow.model.FlowRouteDeal">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="routeId" property="routeId" jdbcType="VARCHAR" />
+		<result column="routeDealType" property="routeDealType"
+			jdbcType="VARCHAR" />
+		<result column="cTime" property="cTime" jdbcType="TIMESTAMP" />
+		<result column="cUserId" property="cUserId" jdbcType="VARCHAR" />
+		<result column="uTime" property="uTime" jdbcType="TIMESTAMP" />
+		<result column="uUserId" property="uUserId" jdbcType="VARCHAR" />
+		<result column="del" property="del" jdbcType="BIT" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, routeId, routeDealType, cTime, cUserId
+	</sql>
+	<select id="selectFlowRouteDealList" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_route_deal
+		where routeId = #{routeId,jdbcType=VARCHAR} and del=0
+		 order by cTime desc
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from im_tp_flow_route_deal
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<insert id="insertSelective" parameterType="com.allmsi.flow.model.FlowRouteDeal">
+		insert into im_tp_flow_route_deal
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="routeId != null">
+				routeId,
+			</if>
+			<if test="routeDealType != null">
+				routeDealType,
+			</if>
+			<if test="cUserId != null">
+				cUserId,
+			</if>
+			cTime, del
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="routeId != null">
+				#{routeId,jdbcType=VARCHAR},
+			</if>
+			<if test="routeDealType != null">
+				#{routeDealType,jdbcType=VARCHAR},
+			</if>
+			<if test="cUserId != null">
+				#{cUserId,jdbcType=VARCHAR},
+			</if>
+			now(),0
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.allmsi.flow.model.FlowRouteDeal">
+		update im_tp_flow_route_deal
+		<set>
+			<if test="routeId != null">
+				routeId = #{routeId,jdbcType=VARCHAR},
+			</if>
+			<if test="routeDealType != null">
+				routeDealType = #{routeDealType,jdbcType=VARCHAR},
+			</if>
+			<if test="uUserId != null">
+				uUserId = #{uUserId,jdbcType=VARCHAR},
+			</if>
+			uTime = now()
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByPrimaryKey" parameterType="com.allmsi.flow.model.FlowRouteDeal">
+		update im_tp_flow_route_deal set uTime = now(),del=1
+		<if test="uUserId != null">
+			,uUserId = #{uUserId,jdbcType=VARCHAR}
+		</if>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByRouteId" parameterType="java.lang.String">
+		update im_tp_flow_route_deal set uTime = now(),del=1
+		where routeId = #{routeId,jdbcType=VARCHAR}
+	</update>
+</mapper>
